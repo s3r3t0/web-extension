@@ -62,7 +62,7 @@ The latest version of the template is tested with the latest version of SeReTo.
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0][license] - see the [LICENSE.md][license] file for details.
+This project is licensed under the [GNU General Public License v3.0][license] - see the [LICENSE][license] file for details.
 
 ## FAQ
 
@@ -79,7 +79,7 @@ The other browsers are not tested at the moment.
 [SeReTo]: https://github.com/s3r3t0/sereto
 [semver]: https://semver.org
 [tags]: https://github.com/s3r3t0/web-extension/tags
-[license]: https://github.com/s3r3t0/web-extension/blob/main/LICENSE.md
+[license]: https://github.com/s3r3t0/web-extension/blob/main/LICENSE
 [Changelog]: https://github.com/s3r3t0/web-extension/blob/main/CHANGELOG.md
 [nn]: https://www.nn.cz/kariera/en/nn-digital-hub/
 [release]: https://github.com/s3r3t0/web-extension/releases/latest
