@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "SeReTo helper",
+  "version": "0.0.1",
+  "description": "Simplified reporting of cookie issues in SeReTo.",
+  "homepage_url": "https://github.com/s3r3t0/web-extension",
+
+  "icons": {
+    "48": "icons/sereto.png",
+    "96": "icons/sereto@2x.png"
+  },
+
+  "permissions": [
+    "cookies",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "action": {
+    "default_title": "SeReTo helper",
+    "default_popup": "popup/sereto.html",
+    "default_icon": {
+      "19": "icons/default19.png",
+      "38": "icons/default38.png"
+    }
+  }
+}
