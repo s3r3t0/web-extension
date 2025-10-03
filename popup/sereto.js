@@ -40,10 +40,14 @@ function showCookiesForTab(tabs) {
   });
 }
 
-function copyCookies() {
-  var copyText = document.querySelector("#textarea-cookies");
-  copyText.select();
-  document.execCommand("copy");
+async function copyCookies() {
+  try {
+    var copyText = document.querySelector("#textarea-cookies");
+    copyText.select();
+    await navigator.clipboard.writeText(copyText.value);
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+  }
 }
 
 // get active tab to run an callback function
