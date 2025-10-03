@@ -1,3 +1,7 @@
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 function showCookiesForTab(tabs) {
   // get the first tab object in the array
   let tab = tabs.pop();
