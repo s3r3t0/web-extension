@@ -28,6 +28,7 @@ Browser web extension to support easy reporting of cookie issues with the [Secur
   - [License](#license)
   - [FAQ](#faq)
     - [Does it work with my browser?](#does-it-work-with-my-browser)
+    - [Why the extension does not load properly in Flatpak Firefox?](#why-the-extension-does-not-load-properly-in-flatpak-firefox)
   - [Acknowledgements](#acknowledgements)
 
 ## Getting Started
@@ -53,6 +54,12 @@ tar -xzvf /tmp/sereto_extension "$HOME/sereto_extension"
 
 Open the `about:debugging` page in Firefox. Click on "Load Temporary Add-on..." in the "This Firefox" tab. Navigate to the directory where you cloned the repository and select the `manifest.json` file.
 
+The extension is not bundled at the moment. If you need to bundle it, you can run the following command:
+
+```bash
+zip -r -FS ../sereto_extension.zip * --exclude='*.git*'
+```
+
 ## Versioning
 
 We use [Semantic Versioning][semver] for versioning. For the versions available, see the [tags on this repository][tags] or the full [Changelog].
@@ -71,6 +78,10 @@ This project is licensed under the [GNU General Public License v3.0][license] - 
 The extension is designed to work with Firefox.
 It may work with other browsers that support WebExtensions API, but it is not guaranteed.
 The other browsers are not tested at the moment.
+
+### Why the extension does not load properly in Flatpak Firefox?
+
+Flatpak applications are sandboxed, which can cause issues with loading raw extensions. To resolve this, you may need to load the extension in its bundled form (zip file). For more details see [Installing](#installing) section.
 
 ## Acknowledgements
 
