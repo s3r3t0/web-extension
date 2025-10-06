@@ -15,6 +15,8 @@
 ![GitHub language count](https://img.shields.io/github/languages/count/s3r3t0/web-extension)
 ![GitHub top language](https://img.shields.io/github/languages/top/s3r3t0/web-extension)
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/s3r3t0/web-extension/badge)](https://scorecard.dev/viewer/?uri=github.com/s3r3t0/web-extension)
+
 Browser web extension to support easy reporting of cookie issues with the [Security Reporting Tool (SeReTo)][SeReTo].
 
 ## Table of Contents
