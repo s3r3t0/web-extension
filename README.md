@@ -28,6 +28,7 @@ Browser web extension to support easy reporting of cookie issues with the [Secur
     - [Installing](#installing)
   - [Versioning](#versioning)
   - [License](#license)
+  - [Security Policy](#security-policy)
   - [FAQ](#faq)
     - [Does it work with my browser?](#does-it-work-with-my-browser)
     - [Why the extension does not load properly in Flatpak Firefox?](#why-the-extension-does-not-load-properly-in-flatpak-firefox)
@@ -73,6 +74,10 @@ The latest version of the template is tested with the latest version of SeReTo.
 
 This project is licensed under the [GNU General Public License v3.0][license] - see the [LICENSE][license] file for details.
 
+## Security Policy
+
+Before reporting a security issue, please review our [security policy][security].
+
 ## FAQ
 
 ### Does it work with my browser?
@@ -96,3 +101,4 @@ Flatpak applications are sandboxed, which can cause issues with loading raw exte
 [Changelog]: https://github.com/s3r3t0/web-extension/blob/main/CHANGELOG.md
 [nn]: https://www.nn.cz/kariera/en/nn-digital-hub/
 [release]: https://github.com/s3r3t0/web-extension/releases/latest
+[security]: https://github.com/s3r3t0/web-extension/blob/main/SECURITY.md
