@@ -1,0 +1,7 @@
+{
+    "version": { "license": "GPL-3.0-only" },
+    "categories": ["privacy-security"],
+    "requires-payment": false,
+    "summary": {"en-US": "Simplified reporting of cookie issues in SeReTo."},
+    "homepage": {"en-US": "https://github.com/s3r3t0/web-extension"}
+}
