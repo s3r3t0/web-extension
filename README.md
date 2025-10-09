@@ -23,6 +23,7 @@ Browser web extension to support easy reporting of cookie issues with the [Secur
 
 - [SeReTo Helper Web Extension](#sereto-helper-web-extension)
   - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
   - [Getting Started](#getting-started)
     - [Download](#download)
     - [Installing](#installing)
@@ -33,6 +34,12 @@ Browser web extension to support easy reporting of cookie issues with the [Secur
     - [Does it work with my browser?](#does-it-work-with-my-browser)
     - [Why the extension does not load properly in Flatpak Firefox?](#why-the-extension-does-not-load-properly-in-flatpak-firefox)
   - [Acknowledgements](#acknowledgements)
+
+## Usage
+
+The extension is available in the Mozilla web extension store. Firefox user may got to the [product page](https://addons.mozilla.org/en-US/firefox/addon/sereto-helper/) and click on the `Add to Firefox` button.
+
+If you are using different browser you may continue with the manual installation below. Please, keep in mind that the extension is tested in the Firefox only at the moment.
 
 ## Getting Started
 
