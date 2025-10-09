@@ -34,6 +34,7 @@ function showCookiesForTab(tabs) {
       cookieTextArea.value = cookieTextArea.value.replace(/false/gi, "no");
       cookieTextArea.value += ']\nsecure = ' + secure + '\nhttp_only = ' + httpOnly + '\nsame_site = ' + sameSite + '\n';
       cookieTextArea.value = cookieTextArea.value.replace(/no_restriction/gi, "None");
+      cookieTextArea.value = cookieTextArea.value.replace(/unspecified/gi, "None");
     } else {
       cookieTextArea.value = "No cookies in this tab.";
     }
