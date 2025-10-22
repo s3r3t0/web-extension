@@ -7,7 +7,8 @@ function showCookiesForTab(tabs) {
   let tab = tabs.pop();
 
   // get all cookies in the domain
-  var gettingAllCookies = browser.cookies.getAll({url: tab.url});
+  let domain = new URL(tab.url).hostname;
+  var gettingAllCookies = browser.cookies.getAll({domain: domain});
   gettingAllCookies.then((cookies) => {
 
     // set the header of the panel
