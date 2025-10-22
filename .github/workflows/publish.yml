@@ -6,6 +6,8 @@ on:
 jobs:
   sign:
     name: "Release"
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
@@ -42,7 +44,7 @@ jobs:
           metaDataFile: amo_metadata.json
           approvalNotes: "Please find more information at https://github.com/kewisch/action-web-ext"
           releaseNotes: ${{ github.event.release.body }}
-          license: GPL-3.0-only
+          licenseFile: LICENSE
           apiKey: ${{ secrets.AMO_SIGN_KEY }}
           apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
           timeout: 900000
