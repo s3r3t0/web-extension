@@ -1,0 +1,56 @@
+name: "Publish"
+on:
+  release:
+    types: [published]
+
+jobs:
+  sign:
+    name: "Release"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #v5.0.0
+
+      - name: "web-ext lint"
+        uses: kewisch/action-web-ext@fe10addf5d5e5ba6b78ffde720dd488a27d10e8c #v1.3
+        with:
+          cmd: lint
+          source: src
+          channel: listed
+
+      - name: "web-ext build"
+        id: web-ext-build
+        uses: kewisch/action-web-ext@fe10addf5d5e5ba6b78ffde720dd488a27d10e8c #v1.3
+        with:
+          cmd: build
+          source: src
+
+      - name: "Collect sources"
+        run: git archive --format=zip --output=sources.zip ${{ github.ref }}
+
+      - name: "Collect metadata"
+        id: metadata
+        run: echo "json=$(jq -c . < amo_metadata.json)" >> $GITHUB_OUTPUT
+
+      - name: "web-ext sign AMO"
+        id: web-ext-sign
+        uses: kewisch/action-web-ext@fe10addf5d5e5ba6b78ffde720dd488a27d10e8c #v1.3
+        with:
+          cmd: sign
+          source: ${{ steps.web-ext-build.outputs.target }}
+          channel: listed
+          metaDataFile: amo_metadata.json
+          approvalNotes: "Please find more information at https://github.com/kewisch/action-web-ext"
+          releaseNotes: ${{ github.event.release.body }}
+          license: GPL-3.0-only
+          apiKey: ${{ secrets.AMO_SIGN_KEY }}
+          apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
+          timeout: 900000
+
+      - name: "Attach release assets to release"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            ${{ steps.web-ext-sign.outputs.target }}
+
