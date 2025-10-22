@@ -24,5 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial version
 
 [Unreleased]: https://github.com/s3r3t0/web-extension/compare/v0.0.2...HEAD
-[0.0.1]: https://github.com/s3r3t0/web-extension/releases/tag/v0.0.2
+[0.0.2]: https://github.com/s3r3t0/web-extension/releases/tag/v0.0.2
 [0.0.1]: https://github.com/s3r3t0/web-extension/releases/tag/v0.0.1
