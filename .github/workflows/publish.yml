@@ -42,7 +42,6 @@ jobs:
           source: ${{ steps.web-ext-build.outputs.target }}
           channel: listed
           metaDataFile: amo_metadata.json
-          approvalNotes: "Please find more information at https://github.com/kewisch/action-web-ext"
           releaseNotes: ${{ github.event.release.body }}
           licenseFile: LICENSE
           apiKey: ${{ secrets.AMO_SIGN_KEY }}
