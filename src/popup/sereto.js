@@ -12,7 +12,9 @@ function showCookiesForTab(tabs) {
   }
 
   // get all cookies in the domain
-  const domain = new URL(tab.url).hostname;
+  const hostname = new URL(tab.url).hostname;
+  const parts = hostname.split('.');
+  const domain = parts.length > 2 ? parts.slice(1).join('.') : hostname;
   const gettingAllCookies = browser.cookies.getAll({domain: domain});
   gettingAllCookies.then((cookies) => {
 

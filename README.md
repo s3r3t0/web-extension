@@ -67,7 +67,8 @@ Open the `about:debugging` page in Firefox. Click on "Load Temporary Add-on..." 
 The extension is not bundled at the moment. If you need to bundle it, you can run the following command:
 
 ```bash
-zip -r -FS ../sereto_extension.zip src/* --exclude='*.git*'
+cd src
+zip -r -FS ../sereto_extension.zip *
 ```
 
 ## Versioning
