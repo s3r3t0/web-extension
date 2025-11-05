@@ -20,7 +20,7 @@ function showCookiesForTab(tabs) {
 
     // set the header of the panel
     let activeTabUrl = document.getElementById('header-title');
-    activeTabUrl.innerText = `Cookies at:\n\t${tab.title}\n\t${tab.url}`;
+    activeTabUrl.innerText = `Cookies at: ${tab.title}`;
     const cookieTextArea = document.getElementById("textarea-cookies");
 
     if (cookies.length > 0) {
@@ -36,7 +36,7 @@ function showCookiesForTab(tabs) {
       } else if (selectedOption === 'persistent') {
         output = getCookiesPersistent(cookies);
       }
-      cookieTextArea.value = output;
+      cookieTextArea.value = `locators = [{type = "url", value = "${tab.url}"}]\n\n${output}`;
     } else {
       cookieTextArea.value = "No cookies in this tab.";
     }
