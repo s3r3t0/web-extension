@@ -26,6 +26,8 @@ function showCookiesForTab(tabs) {
     if (cookies.length > 0) {
       // sort cookies by name
       cookies.sort((a, b) => a.name.localeCompare(b.name));
+      // filter out cookies for other domains
+      cookies = cookies.filter(cookie => {return (cookie.domain === hostname || cookie.domain === `.${domain}`);});
       // insert cookies into the textarea
       let output = '';
       const selectedOption = document.querySelector('input[name="cookie-list"]:checked').value;

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SeReTo helper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simplified reporting of cookie issues in SeReTo.",
   "homepage_url": "https://github.com/s3r3t0/web-extension",
 
