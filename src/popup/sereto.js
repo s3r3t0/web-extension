@@ -19,34 +19,90 @@ function showCookiesForTab(tabs) {
   gettingAllCookies.then((cookies) => {
 
     // set the header of the panel
-    const activeTabUrl = document.getElementById('header-title');
-    const text = document.createTextNode(`Cookies at: ${tab.title}`);
+    let activeTabUrl = document.getElementById('header-title');
+    activeTabUrl.innerText = `Cookies at:\n\t${tab.title}\n\t${tab.url}`;
     const cookieTextArea = document.getElementById("textarea-cookies");
-    activeTabUrl.appendChild(text);
 
     if (cookies.length > 0) {
       // sort cookies by name
       cookies.sort((a, b) => a.name.localeCompare(b.name));
       // insert cookies into the textarea
-      cookieTextArea.value += '[variables]\ncookies = [\n';
-      let secure = true;
-      let httpOnly = true;
-      let sameSite = true;
-      for (const cookie of cookies) {
-        secure = secure && cookie.secure;
-        httpOnly = httpOnly && cookie.httpOnly;
-        sameSite = sameSite && cookie.sameSite !== "no_restriction";
-        cookieTextArea.value += `    { name = "${cookie.name}", http_only = "${cookie.httpOnly}", secure = "${cookie.secure}", same_site = "${capitalizeFirstLetter(cookie.sameSite)}" },\n`;
+      let output = '';
+      const selectedOption = document.querySelector('input[name="cookie-list"]:checked').value;
+      if (selectedOption === 'flags') {
+        output = getCookiesFlags(cookies);
+      } else if (selectedOption === 'parent-domain') {
+        output = getCookiesParentDomain(cookies);
+      } else if (selectedOption === 'persistent') {
+        output = getCookiesPersistent(cookies);
       }
-      cookieTextArea.value = cookieTextArea.value.replace(/true/gi, "yes");
-      cookieTextArea.value = cookieTextArea.value.replace(/false/gi, "no");
-      cookieTextArea.value += `]\nsecure = ${secure}\nhttp_only = ${httpOnly}\nsame_site = ${sameSite}\n`;
-      cookieTextArea.value = cookieTextArea.value.replace(/no_restriction/gi, "None");
-      cookieTextArea.value = cookieTextArea.value.replace(/unspecified/gi, "None");
+      cookieTextArea.value = output;
     } else {
       cookieTextArea.value = "No cookies in this tab.";
     }
   });
+}
+
+function getCookiesFlags(cookies) {
+  let output = '[variables]\ncookies = [\n';
+  let secure = true;
+  let httpOnly = true;
+  let sameSite = true;
+
+  for (const cookie of cookies) {
+    secure = secure && cookie.secure;
+    httpOnly = httpOnly && cookie.httpOnly;
+    sameSite = sameSite && cookie.sameSite !== "no_restriction";
+    output += `    { name = "${cookie.name}", http_only = "${cookie.httpOnly}", secure = "${cookie.secure}", same_site = "${capitalizeFirstLetter(cookie.sameSite)}" },\n`;
+  }
+  output += ']\n';
+  output = output.replace(/true/gi, "yes");
+  output = output.replace(/false/gi, "no");
+  output += `secure = ${secure}\nhttp_only = ${httpOnly}\nsame_site = ${sameSite}\n`;
+  // Firefox uses "no_restriction" for None
+  output = output.replace(/no_restriction/gi, "None");
+  // Cookies behave as Lax by default
+  output = output.replace(/unspecified/gi, "Lax");
+  return output;
+}
+
+function getCookiesParentDomain(cookies) {
+  let output = '[variables]\ncookies = [\n';
+
+  for (const cookie of cookies) {
+    if (cookie.domain.startsWith('.')) {
+      output += `    "${cookie.name}",\n`;
+      domain = cookie.domain;
+    }
+  }
+  output += `]\ndomain = "${domain}"\n`;
+  return output;
+}
+
+function getCookiesPersistent(cookies) {
+  let output = '[variables]\ncookies = [\n';
+
+  for (const cookie of cookies) {
+    if (cookie.expirationDate && cookie.expirationDate > Date.now() / 1000) {
+      // recalculate lifespan in days
+      const currentTime = Math.floor(Date.now() / 1000);
+      const lifespanSeconds = cookie.expirationDate - currentTime;
+      let lifespan = `${lifespanSeconds} seconds`;
+      const days = Math.floor(lifespanSeconds / 86400);
+      const hours = Math.floor(lifespanSeconds / 3600);
+      const minutes = Math.floor(lifespanSeconds / 60);
+      if (days > 0) {
+        lifespan = `${days} days`;
+      } else if (hours > 0) {
+        lifespan = `${hours} hours`;
+      } else if (minutes > 0) {
+        lifespan = `${minutes} minutes`;
+      }
+      output += `    { name = "${cookie.name}", lifespan = "${lifespan}" },\n`;
+    }
+  }
+  output += ']\n';
+  return output;
 }
 
 async function copyCookies() {
@@ -70,7 +126,17 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function updateCookieDisplay() {
+  getActiveTab().then(showCookiesForTab);
+}
+
 // add event listener for the copy button for cookies
 document.querySelector("#copy-cookies").addEventListener("click", copyCookies);
 
-getActiveTab().then(showCookiesForTab);
+// add event listener for the radio buttons
+const radioButtons = document.querySelectorAll('input[name="cookie-list"]');
+radioButtons.forEach(radio => {
+  radio.addEventListener('change', updateCookieDisplay);
+});
+
+updateCookieDisplay();

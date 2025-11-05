@@ -11,6 +11,16 @@
       <div class="panel-section panel-section-header">
         <div class="text-section-header" id="header-title"></div>
       </div>
+      <div class="panel-section panel-section-menu">
+        <form id="cookie-output-form">
+          <input type="radio" id="flags" name="cookie-list" value="flags" checked>
+          <label for="flags">Cookie flags</label>
+          <input type="radio" id="parent-domain" name="cookie-list" value="parent-domain">
+          <label for="parent-domain">Parent domain cookies</label>
+          <input type="radio" id="persistent" name="cookie-list" value="persistent">
+          <label for="persistent">Persistent cookies</label>
+        </form>
+      </div>
       <textarea id="textarea-cookies" rows="8" cols="80"></textarea>
       <button id="copy-cookies">Copy</button>
     </div>
