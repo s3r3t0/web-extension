@@ -1,0 +1,109 @@
+:root {
+    --bg: #f7f3ea;
+    --panel: #fffaf0;
+    --line: #dccfb8;
+    --text: #1f1d17;
+    --accent: #1f6f5f;
+    --danger: #983d2f;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    color: var(--text);
+    background: radial-gradient(circle at 20% 0%, #fef5d7 0%, var(--bg) 58%);
+}
+
+.layout {
+    width: min(1200px, 95vw);
+    margin: 1.5rem auto 3rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.hero {
+    background: linear-gradient(130deg, #fff1ca 0%, #f4ebe2 70%);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.2rem;
+}
+
+.hero h1 {
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+button {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.55rem 0.8rem;
+    background: white;
+    cursor: pointer;
+}
+
+button.primary {
+    color: white;
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+button.danger {
+    color: white;
+    border-color: var(--danger);
+    background: var(--danger);
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.6rem;
+    vertical-align: top;
+    text-align: left;
+}
+
+.note {
+    margin-top: 0.4rem;
+    color: #4f4b42;
+    font-size: 0.88rem;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.actions-cell-controls {
+    display: flex;
+    gap: 0.4rem;
+}
+
+@media (max-width: 700px) {
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions-cell-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

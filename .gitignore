@@ -138,3 +138,14 @@ dist
 # web-ext
 web-ext-artifacts/
 *.zip
+
+# Python / uv / docs build artifacts
+.venv/
+*.egg-info/
+site/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+__pycache__/
+*.py[cod]

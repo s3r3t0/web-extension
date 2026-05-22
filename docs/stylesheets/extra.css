@@ -1,0 +1,16 @@
+/* Lighter grey dark mode tuning for the slate scheme */
+[data-md-color-scheme="slate"] {
+    --md-hue: 210;
+
+    /* Base surfaces */
+    --md-default-bg-color: hsla(var(--md-hue), 12%, 20%, 1);
+    --md-code-bg-color: hsla(var(--md-hue), 12%, 24%, 1);
+
+    /* Text contrast */
+    --md-default-fg-color: hsla(var(--md-hue), 18%, 92%, 1);
+    --md-default-fg-color--light: hsla(var(--md-hue), 15%, 80%, 1);
+    --md-default-fg-color--lighter: hsla(var(--md-hue), 15%, 68%, 1);
+
+    /* Subtle borders/dividers */
+    --md-default-fg-color--lightest: hsla(var(--md-hue), 12%, 38%, 1);
+}

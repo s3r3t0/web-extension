@@ -27,6 +27,13 @@ Browser web extension to support easy reporting of cookie issues with the [Secur
   - [Getting Started](#getting-started)
     - [Download](#download)
     - [Installing](#installing)
+  - [Cookie Lab Test Application](#cookie-lab-test-application)
+    - [Prerequisites](#prerequisites)
+    - [Host Mapping](#host-mapping)
+    - [Quick Start](#quick-start)
+    - [Run Modes](#run-modes)
+    - [Test and Quality Targets](#test-and-quality-targets)
+  - [Wiki](#wiki)
   - [Versioning](#versioning)
   - [License](#license)
   - [Security Policy](#security-policy)
@@ -70,6 +77,68 @@ The extension is not bundled at the moment. If you need to bundle it, you can ru
 cd src
 zip -r -FS ../sereto_extension.zip *
 ```
+
+## Cookie Lab Test Application
+
+This repository now includes a standards-first Flask testing application to validate cookie handling behavior independently from the extension implementation.
+
+The application provides:
+
+- 18 baseline cookie scenarios (prefixes, SameSite, scope, persistence, path)
+- set/clear endpoints for individual and bulk scenario operations
+- a browser UI for manual testing
+- pytest smoke coverage for scenario metadata and endpoint behavior
+
+### Prerequisites
+
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/)
+
+### Host Mapping
+
+For parent-domain and subdomain scenarios, map the following hosts to localhost:
+
+```text
+127.0.0.1 app.localtest.me
+127.0.0.1 api.localtest.me
+```
+
+### Quick Start
+
+```bash
+make bootstrap
+make run-https
+```
+
+Then open:
+
+- <https://app.localtest.me:8443>
+- <https://api.localtest.me:8443>
+
+### Run Modes
+
+- HTTP mode: `make run-http`
+- HTTPS mode (recommended for Secure and prefix scenarios): `make run-https`
+
+The HTTPS target uses Flask adhoc certificates, which require the `cryptography` package. This dependency is included in `pyproject.toml` and is installed automatically when using `uv`.
+
+### Test and Quality Targets
+
+- `make test`
+- `make test-scenarios`
+- `make test-coverage`
+- `make lint`
+- `make format-check`
+- `make precommit`
+- `make ci-local`
+
+## Wiki
+
+Project wiki content is under `docs/` and uses native Zensical TOML configuration in `zensical.toml`.
+
+- Serve docs locally: `make docs-serve`
+- Build docs: `make docs-build`
+- Build docs in strict mode: `make docs-check`
 
 ## Versioning
 
