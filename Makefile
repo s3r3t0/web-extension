@@ -5,7 +5,7 @@ APP_HOST ?= 0.0.0.0
 APP_HTTP_PORT ?= 8000
 APP_HTTPS_PORT ?= 8443
 
-.PHONY: bootstrap sync lock clean run-http run-https test test-scenarios test-coverage docs-serve docs-build docs-check lint format-check precommit ci-local
+.PHONY: bootstrap sync lock clean run-http run-https test test-scenarios test-coverage test-e2e-install test-e2e test-e2e-chromium test-e2e-firefox test-e2e-runtime docs-serve docs-build docs-check lint format-check precommit ci-local
 
 bootstrap:
 	$(UV) sync --group dev --group docs --group lint --group test
@@ -34,6 +34,21 @@ test-scenarios:
 test-coverage:
 	$(UV) run --group test pytest --cov=cookie_lab --cov-report=term-missing
 
+test-e2e-install:
+	$(UV) run --group test playwright install chromium firefox
+
+test-e2e:
+	$(UV) run --group test pytest tests/e2e
+
+test-e2e-chromium:
+	E2E_BROWSERS=chromium $(UV) run --group test pytest tests/e2e
+
+test-e2e-firefox:
+	E2E_BROWSERS=firefox $(UV) run --group test pytest tests/e2e
+
+test-e2e-runtime:
+	E2E_EXTENSION_RUNTIME=1 $(UV) run --group test pytest tests/e2e/test_extension_runtime_popup.py
+
 docs-serve:
 	$(UV) run --group docs zensical serve
 
@@ -52,4 +67,4 @@ format-check:
 precommit:
 	$(UV) run --group dev pre-commit run --all-files
 
-ci-local: lint format-check test docs-build
+ci-local: lint format-check test docs-build test-e2e-chromium

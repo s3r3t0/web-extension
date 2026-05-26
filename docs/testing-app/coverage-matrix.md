@@ -14,7 +14,8 @@
 - Scenario set/clear endpoints: implemented
 - Browser-ground-truth assertions in docs: implemented
 - Automated endpoint smoke tests: implemented
-- End-to-end browser automation against extension popup: planned
+- End-to-end browser automation against extension popup: implemented (smoke in Chromium + Firefox)
+- Chromium runtime extension popup smoke: implemented (optional target)
 
 ## Gap tracking
 
