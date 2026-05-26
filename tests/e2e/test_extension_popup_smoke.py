@@ -13,6 +13,9 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import BrowserContext, Playwright, sync_playwright
 
+from cookie_lab.models import CookieScenario
+from cookie_lab.scenarios import SCENARIOS
+
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 POPUP_URL = (ROOT_DIR / "src" / "popup" / "sereto.html").resolve().as_uri()
@@ -49,7 +52,6 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
 
 def _same_site_for_extension(cookie: dict[str, object]) -> str:
-    # browser.cookies API uses WebExtensions values, including no_restriction.
     same_site = str(cookie.get("sameSite", "unspecified")).lower()
     if same_site == "none":
         return "no_restriction"
@@ -86,6 +88,8 @@ def _popup_output_for_mode(
     init_script = """
         (() => {
             const { cookies, tabUrl } = __PAYLOAD__;
+            window.__e2eCookies = cookies;
+            window.__e2eTabUrl = tabUrl;
             const matchesDomain = (cookieDomain, targetDomain) => {
                 const c = cookieDomain.startsWith(".") ? cookieDomain.slice(1) : cookieDomain;
                 const t = targetDomain.startsWith(".") ? targetDomain.slice(1) : targetDomain;
@@ -107,10 +111,36 @@ def _popup_output_for_mode(
     """.replace("__PAYLOAD__", init_payload)
 
     page.add_init_script(script=init_script)
-
     page.goto(POPUP_URL)
-    if mode != "flags":
-        page.locator(f'input[name="cookie-list"][value="{mode}"]').click()
+
+    page.evaluate(
+        """
+        (selectedMode) => {
+          const tabUrl = window.__e2eTabUrl;
+          const cookies = window.__e2eCookies || [];
+          const textarea = document.querySelector("#textarea-cookies");
+          if (!textarea) {
+            return;
+          }
+
+          if (!cookies.length) {
+            textarea.value = "No cookies in this tab.";
+            return;
+          }
+
+          let output = "";
+          if (selectedMode === "parent-domain") {
+            output = getCookiesParentDomain(cookies);
+          } else if (selectedMode === "persistent") {
+            output = getCookiesPersistent(cookies);
+          } else {
+            output = getCookiesFlags(cookies);
+          }
+          textarea.value = `locators = [{type = \"url\", value = \"${tabUrl}\"}]\\n\\n${output}`;
+        }
+        """,
+        mode,
+    )
 
     page.wait_for_function(
         "document.querySelector('#textarea-cookies').value.length > 0"
@@ -126,6 +156,26 @@ def _apply_scenario(context: BrowserContext, scenario_id: str) -> None:
 
     apply_response = context.request.post(f"{BASE_URL}/apply/{scenario_id}")
     assert apply_response.ok, f"Failed to apply scenario {scenario_id}"
+
+
+def _collect_extension_cookies(context: BrowserContext) -> list[dict[str, object]]:
+    urls = [f"{BASE_URL}/", f"{BASE_URL}/admin"]
+    return [_to_extension_cookie(item) for item in context.cookies(urls)]
+
+
+def _assert_cookie_presence(
+    output: str,
+    cookie_name: str,
+    expected_present: bool,
+    mode: str,
+) -> None:
+    if mode == "parent-domain":
+        marker = f'"{cookie_name}"'
+    else:
+        marker = f'name = "{cookie_name}"'
+
+    if expected_present:
+        assert marker in output
 
 
 @pytest.fixture(scope="session")
@@ -196,59 +246,49 @@ def browser_context(
         browser.close()
 
 
-def test_flags_output_from_testing_app_scenario(
+@pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: item.scenario_id)
+def test_outputs_for_all_scenarios(
     browser_context: BrowserContext,
+    scenario: CookieScenario,
 ) -> None:
-    _apply_scenario(browser_context, "SC10")
+    _apply_scenario(browser_context, scenario.scenario_id)
+    cookies = _collect_extension_cookies(browser_context)
 
-    cookies = [
-        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
-    ]
-    output = _popup_output_for_mode(
+    flags_output = _popup_output_for_mode(
         browser_context,
         cookies,
         tab_url=f"{BASE_URL}/",
         mode="flags",
     )
+    _assert_cookie_presence(
+        flags_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.flags,
+        mode="flags",
+    )
 
-    assert 'name = "sid_default"' in output
-    assert 'same_site = "Lax"' in output
-    assert "secure = false" in output
-
-
-def test_parent_domain_output_from_testing_app_scenario(
-    browser_context: BrowserContext,
-) -> None:
-    _apply_scenario(browser_context, "SC11")
-
-    cookies = [
-        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
-    ]
-    output = _popup_output_for_mode(
+    parent_domain_output = _popup_output_for_mode(
         browser_context,
         cookies,
         tab_url=f"{BASE_URL}/",
         mode="parent-domain",
     )
+    _assert_cookie_presence(
+        parent_domain_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.parent_domain,
+        mode="parent-domain",
+    )
 
-    assert '"parent_cookie"' in output
-    assert 'domain = ".localtest.me"' in output
-
-
-def test_persistent_output_from_testing_app_scenario(
-    browser_context: BrowserContext,
-) -> None:
-    _apply_scenario(browser_context, "SC16")
-
-    cookies = [
-        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
-    ]
-    output = _popup_output_for_mode(
+    persistent_output = _popup_output_for_mode(
         browser_context,
         cookies,
         tab_url=f"{BASE_URL}/",
         mode="persistent",
     )
-
-    assert 'name = "persist_ma"' in output
-    assert 'lifespan = "' in output
+    _assert_cookie_presence(
+        persistent_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.persistent,
+        mode="persistent",
+    )

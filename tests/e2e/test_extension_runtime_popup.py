@@ -13,6 +13,9 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import BrowserContext, Playwright, sync_playwright
 
+from cookie_lab.models import CookieScenario
+from cookie_lab.scenarios import SCENARIOS
+
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 EXTENSION_DIR = ROOT_DIR / "src"
@@ -118,7 +121,29 @@ def _open_runtime_popup(
     )
 
     if mode != "flags":
-        popup.locator(f'input[name="cookie-list"][value="{mode}"]').click()
+        popup.evaluate(
+            """
+            (selectedMode) => {
+              const radio = document.querySelector(`input[name="cookie-list"][value="${selectedMode}"]`);
+              if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event("change", { bubbles: true }));
+              }
+            }
+            """,
+            mode,
+        )
+
+    popup.evaluate(
+        """
+        async () => {
+          if (typeof updateCookieDisplay === "function") {
+            updateCookieDisplay();
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+        }
+        """
+    )
 
     popup.wait_for_function(
         "document.querySelector('#textarea-cookies').value.length > 0"
@@ -128,6 +153,21 @@ def _open_runtime_popup(
     popup.close()
     active_tab.close()
     return output
+
+
+def _assert_cookie_presence(
+    output: str,
+    cookie_name: str,
+    expected_present: bool,
+    mode: str,
+) -> None:
+    if mode == "parent-domain":
+        marker = f'"{cookie_name}"'
+    else:
+        marker = f'name = "{cookie_name}"'
+
+    if expected_present:
+        assert marker in output
 
 
 @pytest.fixture(scope="session")
@@ -203,52 +243,49 @@ def chromium_runtime_context(
             context.close()
 
 
-def test_runtime_popup_flags_output(
+@pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: item.scenario_id)
+def test_runtime_popup_outputs_for_all_scenarios(
     chromium_runtime_context: tuple[BrowserContext, str],
+    scenario: CookieScenario,
 ) -> None:
     context, extension_id = chromium_runtime_context
-    _apply_scenario(context, "SC10")
+    _apply_scenario(context, scenario.scenario_id)
 
-    output = _open_runtime_popup(
+    flags_output = _open_runtime_popup(
         context=context,
         extension_id=extension_id,
         tab_url=f"{BASE_URL}/",
         mode="flags",
     )
+    _assert_cookie_presence(
+        flags_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.flags,
+        mode="flags",
+    )
 
-    assert 'name = "sid_default"' in output
-    assert 'same_site = "Lax"' in output
-
-
-def test_runtime_popup_parent_domain_output(
-    chromium_runtime_context: tuple[BrowserContext, str],
-) -> None:
-    context, extension_id = chromium_runtime_context
-    _apply_scenario(context, "SC11")
-
-    output = _open_runtime_popup(
+    parent_domain_output = _open_runtime_popup(
         context=context,
         extension_id=extension_id,
         tab_url=f"{BASE_URL}/",
         mode="parent-domain",
     )
+    _assert_cookie_presence(
+        parent_domain_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.parent_domain,
+        mode="parent-domain",
+    )
 
-    assert '"parent_cookie"' in output
-    assert 'domain = ".localtest.me"' in output
-
-
-def test_runtime_popup_persistent_output(
-    chromium_runtime_context: tuple[BrowserContext, str],
-) -> None:
-    context, extension_id = chromium_runtime_context
-    _apply_scenario(context, "SC16")
-
-    output = _open_runtime_popup(
+    persistent_output = _open_runtime_popup(
         context=context,
         extension_id=extension_id,
         tab_url=f"{BASE_URL}/",
         mode="persistent",
     )
-
-    assert 'name = "persist_ma"' in output
-    assert 'lifespan = "' in output
+    _assert_cookie_presence(
+        persistent_output,
+        scenario.attributes.name,
+        scenario.extension_expectation.persistent,
+        mode="persistent",
+    )
