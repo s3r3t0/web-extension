@@ -2,21 +2,19 @@
 
 ## Categories
 
-- Prefix constraints (__Host-,__Secure-)
-- SameSite behavior (Strict, Lax, None)
-- Domain scope (host-only vs parent-domain)
-- Path scope
-- Persistence lifecycle (session, max-age, expires, deletion)
+- Prefix constraints (`__Host-`, `__Secure-`)
+- SameSite behavior (`Strict`, `Lax`, `None`, omitted)
+- Domain scope (`host-only` vs `domain`)
+- Path scope (`/` vs nested path)
+- Persistence lifecycle (`session`, `Max-Age`, `Expires`, deletion)
 
 ## Current status
 
-- Scenario metadata: implemented
-- Scenario set/clear endpoints: implemented
-- Browser-ground-truth assertions in docs: implemented
-- Automated endpoint smoke tests: implemented
-- End-to-end browser automation against extension popup: implemented (smoke in Chromium + Firefox)
-- Chromium runtime extension popup smoke: implemented (optional target)
-
-## Gap tracking
-
-Track missing scenarios or divergent behavior by linking issue IDs in this table in future updates.
+- [x] Scenario metadata
+- [x] Scenario set/clear endpoints
+- [x] Browser-ground-truth assertions in docs
+- [x] Standards baseline with technical acceptance rules
+- [x] Implementation reference (source-backed API docs)
+- [x] Automated endpoint smoke tests
+- [x] End-to-end browser automation against extension popup
+- [x] Chromium runtime extension popup (optional target)

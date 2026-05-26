@@ -29,3 +29,12 @@ primary = "blue grey"
 accent = "light blue"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to system preference"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["cookie_lab"]
+inventories = ["https://docs.python.org/3/objects.inv"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+show_source = true
+show_root_heading = true
