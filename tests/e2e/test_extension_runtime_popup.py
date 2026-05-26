@@ -21,6 +21,8 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 EXTENSION_DIR = ROOT_DIR / "src"
 BASE_URL = os.environ.get("COOKIE_LAB_BASE_URL", "https://app.localtest.me:8443")
 
+BROWSER_EXPECTATION_OVERRIDES: dict[str, dict[str, dict[str, bool]]] = {"chromium": {}}
+
 pytestmark = pytest.mark.skipif(
     os.environ.get("E2E_EXTENSION_RUNTIME") != "1",
     reason="Set E2E_EXTENSION_RUNTIME=1 to run runtime extension popup tests.",
@@ -47,11 +49,31 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
 
 def _apply_scenario(context: BrowserContext, scenario_id: str) -> None:
-    clear_response = context.request.post(f"{BASE_URL}/clear-all")
+    clear_response = _post_with_retry(context, f"{BASE_URL}/clear-all")
     assert clear_response.ok, "Failed to clear scenarios before test"
 
-    apply_response = context.request.post(f"{BASE_URL}/apply/{scenario_id}")
+    apply_response = _post_with_retry(context, f"{BASE_URL}/apply/{scenario_id}")
     assert apply_response.ok, f"Failed to apply scenario {scenario_id}"
+
+
+def _post_with_retry(
+    context: BrowserContext,
+    url: str,
+    attempts: int = 3,
+):
+    last_error: Exception | None = None
+    for _ in range(attempts):
+        try:
+            return context.request.post(url)
+        except Exception as error:  # pragma: no cover - flaky network branch
+            if "EAI_AGAIN" not in str(error):
+                raise
+            last_error = error
+            time.sleep(0.5)
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Request failed unexpectedly for URL: {url}")
 
 
 def _find_extension_id(
@@ -168,6 +190,25 @@ def _assert_cookie_presence(
 
     if expected_present:
         assert marker in output
+    else:
+        assert marker not in output
+
+
+def _expected_presence(scenario: CookieScenario, mode: str) -> bool:
+    base_expected = {
+        "flags": scenario.extension_expectation.flags,
+        "parent-domain": scenario.extension_expectation.parent_domain,
+        "persistent": scenario.extension_expectation.persistent,
+    }[mode]
+
+    override = (
+        BROWSER_EXPECTATION_OVERRIDES.get("chromium", {})
+        .get(scenario.scenario_id, {})
+        .get(mode)
+    )
+    if override is None:
+        return base_expected
+    return override
 
 
 @pytest.fixture(scope="session")
@@ -260,7 +301,7 @@ def test_runtime_popup_outputs_for_all_scenarios(
     _assert_cookie_presence(
         flags_output,
         scenario.attributes.name,
-        scenario.extension_expectation.flags,
+        _expected_presence(scenario, "flags"),
         mode="flags",
     )
 
@@ -273,7 +314,7 @@ def test_runtime_popup_outputs_for_all_scenarios(
     _assert_cookie_presence(
         parent_domain_output,
         scenario.attributes.name,
-        scenario.extension_expectation.parent_domain,
+        _expected_presence(scenario, "parent-domain"),
         mode="parent-domain",
     )
 
@@ -286,6 +327,6 @@ def test_runtime_popup_outputs_for_all_scenarios(
     _assert_cookie_presence(
         persistent_output,
         scenario.attributes.name,
-        scenario.extension_expectation.persistent,
+        _expected_presence(scenario, "persistent"),
         mode="persistent",
     )

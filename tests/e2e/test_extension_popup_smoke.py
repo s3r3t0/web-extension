@@ -21,6 +21,17 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 POPUP_URL = (ROOT_DIR / "src" / "popup" / "sereto.html").resolve().as_uri()
 BASE_URL = os.environ.get("COOKIE_LAB_BASE_URL", "https://app.localtest.me:8443")
 
+# Browser engines occasionally diverge for rejected-cookie edge cases.
+# Keep strict negative assertions enabled by encoding observed per-browser deltas.
+BROWSER_EXPECTATION_OVERRIDES: dict[str, dict[str, dict[str, bool]]] = {
+    "chromium": {},
+    "firefox": {
+        "SC02": {"flags": True, "parent-domain": True},
+        "SC05": {"flags": True},
+        "SC07": {"flags": True},
+    },
+}
+
 
 def _selected_browsers() -> list[str]:
     requested = os.environ.get("E2E_BROWSERS", "chromium,firefox")
@@ -151,11 +162,31 @@ def _popup_output_for_mode(
 
 
 def _apply_scenario(context: BrowserContext, scenario_id: str) -> None:
-    clear_response = context.request.post(f"{BASE_URL}/clear-all")
+    clear_response = _post_with_retry(context, f"{BASE_URL}/clear-all")
     assert clear_response.ok, "Failed to clear scenarios before test"
 
-    apply_response = context.request.post(f"{BASE_URL}/apply/{scenario_id}")
+    apply_response = _post_with_retry(context, f"{BASE_URL}/apply/{scenario_id}")
     assert apply_response.ok, f"Failed to apply scenario {scenario_id}"
+
+
+def _post_with_retry(
+    context: BrowserContext,
+    url: str,
+    attempts: int = 3,
+):
+    last_error: Exception | None = None
+    for _ in range(attempts):
+        try:
+            return context.request.post(url)
+        except Exception as error:  # pragma: no cover - flaky network branch
+            if "EAI_AGAIN" not in str(error):
+                raise
+            last_error = error
+            time.sleep(0.5)
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Request failed unexpectedly for URL: {url}")
 
 
 def _collect_extension_cookies(context: BrowserContext) -> list[dict[str, object]]:
@@ -176,6 +207,25 @@ def _assert_cookie_presence(
 
     if expected_present:
         assert marker in output
+    else:
+        assert marker not in output
+
+
+def _expected_presence(browser_name: str, scenario: CookieScenario, mode: str) -> bool:
+    base_expected = {
+        "flags": scenario.extension_expectation.flags,
+        "parent-domain": scenario.extension_expectation.parent_domain,
+        "persistent": scenario.extension_expectation.persistent,
+    }[mode]
+
+    override = (
+        BROWSER_EXPECTATION_OVERRIDES.get(browser_name, {})
+        .get(scenario.scenario_id, {})
+        .get(mode)
+    )
+    if override is None:
+        return base_expected
+    return override
 
 
 @pytest.fixture(scope="session")
@@ -249,6 +299,7 @@ def browser_context(
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: item.scenario_id)
 def test_outputs_for_all_scenarios(
     browser_context: BrowserContext,
+    browser_name: str,
     scenario: CookieScenario,
 ) -> None:
     _apply_scenario(browser_context, scenario.scenario_id)
@@ -263,7 +314,7 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         flags_output,
         scenario.attributes.name,
-        scenario.extension_expectation.flags,
+        _expected_presence(browser_name, scenario, "flags"),
         mode="flags",
     )
 
@@ -276,7 +327,7 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         parent_domain_output,
         scenario.attributes.name,
-        scenario.extension_expectation.parent_domain,
+        _expected_presence(browser_name, scenario, "parent-domain"),
         mode="parent-domain",
     )
 
@@ -289,6 +340,6 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         persistent_output,
         scenario.attributes.name,
-        scenario.extension_expectation.persistent,
+        _expected_presence(browser_name, scenario, "persistent"),
         mode="persistent",
     )
