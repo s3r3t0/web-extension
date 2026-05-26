@@ -31,7 +31,9 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(health_url, timeout=2, context=insecure_ssl) as resp:
+            with urllib.request.urlopen(
+                health_url, timeout=2, context=insecure_ssl
+            ) as resp:
                 if resp.status == 200:
                     return
         except (urllib.error.URLError, TimeoutError, ConnectionError):
@@ -118,7 +120,9 @@ def _open_runtime_popup(
     if mode != "flags":
         popup.locator(f'input[name="cookie-list"][value="{mode}"]').click()
 
-    popup.wait_for_function("document.querySelector('#textarea-cookies').value.length > 0")
+    popup.wait_for_function(
+        "document.querySelector('#textarea-cookies').value.length > 0"
+    )
     output = popup.locator("#textarea-cookies").input_value()
 
     popup.close()
@@ -199,7 +203,9 @@ def chromium_runtime_context(
             context.close()
 
 
-def test_runtime_popup_flags_output(chromium_runtime_context: tuple[BrowserContext, str]) -> None:
+def test_runtime_popup_flags_output(
+    chromium_runtime_context: tuple[BrowserContext, str],
+) -> None:
     context, extension_id = chromium_runtime_context
     _apply_scenario(context, "SC10")
 

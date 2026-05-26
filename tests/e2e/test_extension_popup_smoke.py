@@ -36,7 +36,9 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(health_url, timeout=2, context=insecure_ssl) as resp:
+            with urllib.request.urlopen(
+                health_url, timeout=2, context=insecure_ssl
+            ) as resp:
                 if resp.status == 200:
                     return
         except (urllib.error.URLError, TimeoutError, ConnectionError):
@@ -110,7 +112,9 @@ def _popup_output_for_mode(
     if mode != "flags":
         page.locator(f'input[name="cookie-list"][value="{mode}"]').click()
 
-    page.wait_for_function("document.querySelector('#textarea-cookies').value.length > 0")
+    page.wait_for_function(
+        "document.querySelector('#textarea-cookies').value.length > 0"
+    )
     output = page.locator("#textarea-cookies").input_value()
     page.close()
     return output
@@ -192,10 +196,14 @@ def browser_context(
         browser.close()
 
 
-def test_flags_output_from_testing_app_scenario(browser_context: BrowserContext) -> None:
+def test_flags_output_from_testing_app_scenario(
+    browser_context: BrowserContext,
+) -> None:
     _apply_scenario(browser_context, "SC10")
 
-    cookies = [_to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])]
+    cookies = [
+        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
+    ]
     output = _popup_output_for_mode(
         browser_context,
         cookies,
@@ -208,10 +216,14 @@ def test_flags_output_from_testing_app_scenario(browser_context: BrowserContext)
     assert "secure = false" in output
 
 
-def test_parent_domain_output_from_testing_app_scenario(browser_context: BrowserContext) -> None:
+def test_parent_domain_output_from_testing_app_scenario(
+    browser_context: BrowserContext,
+) -> None:
     _apply_scenario(browser_context, "SC11")
 
-    cookies = [_to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])]
+    cookies = [
+        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
+    ]
     output = _popup_output_for_mode(
         browser_context,
         cookies,
@@ -223,10 +235,14 @@ def test_parent_domain_output_from_testing_app_scenario(browser_context: Browser
     assert 'domain = ".localtest.me"' in output
 
 
-def test_persistent_output_from_testing_app_scenario(browser_context: BrowserContext) -> None:
+def test_persistent_output_from_testing_app_scenario(
+    browser_context: BrowserContext,
+) -> None:
     _apply_scenario(browser_context, "SC16")
 
-    cookies = [_to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])]
+    cookies = [
+        _to_extension_cookie(item) for item in browser_context.cookies([BASE_URL])
+    ]
     output = _popup_output_for_mode(
         browser_context,
         cookies,
