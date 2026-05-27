@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <main class="layout">
+        <header class="hero">
+            <h1>Cookie Standards Test Lab</h1>
+            <p>
+                Apply standards-focused cookie scenarios and compare browser behavior with
+                extension output.
+            </p>
+        </header>
+
+        <section class="actions">
+            <form method="post" action="{{ url_for('apply_all') }}">
+                <button class="primary" type="submit">Apply all scenarios</button>
+            </form>
+            <form method="post" action="{{ url_for('clear_all') }}">
+                <button class="danger" type="submit">Clear all scenarios</button>
+            </form>
+        </section>
+
+        {% for category, scenarios in groups.items() %}
+        <section class="card">
+            <h2>{{ category }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Browser expectation</th>
+                        <th>Extension comparison</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scenario in scenarios %}
+                    <tr>
+                        <td>{{ scenario.scenario_id }}</td>
+                        <td>
+                            <strong>{{ scenario.title }}</strong>
+                            <div class="note">{{ scenario.notes }}</div>
+                        </td>
+                        <td>
+                            {{ scenario.browser_expectation.storage }} /
+                            {{ scenario.browser_expectation.scope }} /
+                            {{ scenario.browser_expectation.persistence }}
+                        </td>
+                        <td>
+                            flags={{ scenario.extension_expectation.flags }},
+                            parent={{ scenario.extension_expectation.parent_domain }},
+                            persistent={{ scenario.extension_expectation.persistent }}
+                        </td>
+                        <td class="actions-cell">
+                            <div class="actions-cell-controls">
+                                <form method="post"
+                                    action="{{ url_for('apply_scenario', scenario_id=scenario.scenario_id) }}">
+                                    <button type="submit">Apply</button>
+                                </form>
+                                <form method="post"
+                                    action="{{ url_for('clear_scenario', scenario_id=scenario.scenario_id) }}">
+                                    <button type="submit">Clear</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endfor %}
+    </main>
+</body>
+
+</html>

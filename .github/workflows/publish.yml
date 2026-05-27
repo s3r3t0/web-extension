@@ -62,4 +62,3 @@ jobs:
         run: |
           gh release upload ${{ github.event.release.tag_name }} \
             ${{ steps.web-ext-sign.outputs.target }}
-

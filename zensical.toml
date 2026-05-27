@@ -1,0 +1,40 @@
+[project]
+site_name = "SeReTo Cookie Lab Wiki"
+site_description = "Extension and standards-first cookie testing documentation"
+site_author = "SeReTo contributors"
+dev_addr = "localhost:8001"
+extra_css = ["stylesheets/extra.css"]
+
+[project.theme]
+favicon = "images/favicon.png"
+
+[project.theme.icon]
+logo = "lucide/terminal"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "blue grey"
+accent = "light blue"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["cookie_lab"]
+inventories = ["https://docs.python.org/3/objects.inv"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+show_source = true
+show_root_heading = true

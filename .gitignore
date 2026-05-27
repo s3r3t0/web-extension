@@ -78,6 +78,7 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+.envrc
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -138,3 +139,14 @@ dist
 # web-ext
 web-ext-artifacts/
 *.zip
+
+# Python / uv / docs build artifacts
+.venv/
+*.egg-info/
+site/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+__pycache__/
+*.py[cod]

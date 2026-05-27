@@ -15,7 +15,7 @@ function showCookiesForTab(tabs) {
   const hostname = new URL(tab.url).hostname;
   const parts = hostname.split('.');
   const domain = parts.length > 2 ? parts.slice(1).join('.') : hostname;
-  const gettingAllCookies = browser.cookies.getAll({domain: domain});
+  const gettingAllCookies = browser.cookies.getAll({ domain: domain });
   gettingAllCookies.then((cookies) => {
 
     // set the header of the panel
@@ -27,7 +27,7 @@ function showCookiesForTab(tabs) {
       // sort cookies by name
       cookies.sort((a, b) => a.name.localeCompare(b.name));
       // filter out cookies for other domains
-      cookies = cookies.filter(cookie => {return (cookie.domain === hostname || cookie.domain === `.${domain}`);});
+      cookies = cookies.filter(cookie => { return (cookie.domain === hostname || cookie.domain === `.${domain}`); });
       // insert cookies into the textarea
       let output = '';
       const selectedOption = document.querySelector('input[name="cookie-list"]:checked').value;
@@ -70,6 +70,7 @@ function getCookiesFlags(cookies) {
 
 function getCookiesParentDomain(cookies) {
   let output = '[variables]\ncookies = [\n';
+  let domain = "";
 
   for (const cookie of cookies) {
     if (cookie.domain.startsWith('.')) {
@@ -120,7 +121,7 @@ async function copyCookies() {
 // get active tab to run an callback function
 // sends to the callback an array of tab objects
 function getActiveTab() {
-  return browser.tabs.query({currentWindow: true, active: true});
+  return browser.tabs.query({ currentWindow: true, active: true });
 }
 
 // capitalize first letter of a string

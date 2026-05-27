@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added testing app with well-defined scenarios covering cookie behavior based on standards.
+- Added test suite for extension output validation against testing app scenarios.
+- Added documentation.
+
 ## [0.1.1] - 2025-11-05
 
 ### Changed
