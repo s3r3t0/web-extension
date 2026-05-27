@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "Standards-first cookie testing lab for SeReTo Helper extension QA"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["Flask>=3.0,<4.0", "cryptography>=42.0,<46.0"]
+dependencies = ["Flask~=3.0", "cryptography~=46.0.5"]
 
 [dependency-groups]
-dev = ["pre-commit>=3.7,<4.0"]
-docs = ["zensical>=0.0.43", "mkdocstrings-python>=1.10,<2.0"]
-lint = ["ruff>=0.6,<1.0"]
-test = ["playwright>=1.54,<2.0", "pytest>=8.2,<9.0", "pytest-cov>=5.0,<6.0"]
+dev = ["pre-commit~=3.7"]
+docs = ["zensical~=0.0.43", "mkdocstrings-python~=1.10"]
+lint = ["ruff~=0.6"]
+test = ["playwright~=1.54", "pytest~=8.2", "pytest-cov~=5.0"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
@@ -20,5 +20,5 @@ testpaths = ["tests"]
 include = ["cookie_lab*"]
 
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools~=68.0", "wheel"]
 build-backend = "setuptools.build_meta"

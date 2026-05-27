@@ -1,0 +1,19 @@
+{
+    "root": true,
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "webextensions": true
+    },
+    "globals": {
+        "browser": "readonly",
+        "chrome": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "script"
+    },
+    "ignorePatterns": [
+        "site/**"
+    ]
+}
