@@ -20,5 +20,5 @@ testpaths = ["tests"]
 include = ["cookie_lab*"]
 
 [build-system]
-requires = ["setuptools~=68.0", "wheel"]
+requires = ["setuptools~=82.0", "wheel"]
 build-backend = "setuptools.build_meta"
