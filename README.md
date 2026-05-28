@@ -144,6 +144,9 @@ Project wiki content is under `docs/` and uses native Zensical TOML configuratio
 - Serve docs locally: `make docs-serve`
 - Build docs: `make docs-build`
 - Build docs in strict mode: `make docs-check`
+- Publish docs to GitHub Pages: GitHub Actions workflow `Docs to GitHub Pages` (`.github/workflows/deploy-pages.yml`)
+- Manual publish trigger: Actions -> `Docs to GitHub Pages` -> `Run workflow`
+- Contributor setup and CI maintenance notes: [docs/contributing.md][contributing]
 
 ## Versioning
 
@@ -184,3 +187,4 @@ Flatpak applications are sandboxed, which can cause issues with loading raw exte
 [nn]: https://www.nn.cz/kariera/en/nn-digital-hub/
 [release]: https://github.com/s3r3t0/web-extension/releases/latest
 [security]: https://github.com/s3r3t0/web-extension/blob/main/SECURITY.md
+[contributing]: https://github.com/s3r3t0/web-extension/blob/main/docs/contributing.md

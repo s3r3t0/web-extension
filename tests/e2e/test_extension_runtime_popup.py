@@ -41,7 +41,11 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
             ) as resp:
                 if resp.status == 200:
                     return
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+        ):  # transient startup/network failure; retry until deadline
             pass
         time.sleep(0.5)
 
@@ -89,7 +93,7 @@ def _find_extension_id(
         worker = context.wait_for_event("serviceworker", timeout=3_000)
         if worker.url.startswith("chrome-extension://"):
             return worker.url.split("/")[2]
-    except Exception:
+    except Exception:  # service worker event may not fire in some environments; fallback to extension directory probing
         pass
 
     deadline = time.time() + timeout_seconds
