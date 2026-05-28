@@ -55,7 +55,11 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
             ) as resp:
                 if resp.status == 200:
                     return
-        except (urllib.error.URLError, TimeoutError, ConnectionError):  # transient startup/network failure; retry until deadline
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            ConnectionError,
+        ):  # transient startup/network failure; retry until deadline
             pass
         time.sleep(0.5)
 
