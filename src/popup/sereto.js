@@ -1,6 +1,4 @@
-if (typeof browser === "undefined") {
-  var browser = chrome;
-}
+var browser = typeof globalThis.browser !== "undefined" ? globalThis.browser : chrome;
 
 function showCookiesForTab(tabs) {
   // get the first tab object in the array
