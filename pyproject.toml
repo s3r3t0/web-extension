@@ -9,7 +9,7 @@ dependencies = ["Flask~=3.1", "cryptography~=46.0.5"]
 [dependency-groups]
 dev = ["pre-commit~=3.7"]
 docs = ["zensical~=0.0.43", "mkdocstrings-python~=2.0"]
-lint = ["ruff~=0.6"]
+lint = ["ruff~=0.15"]
 test = ["playwright~=1.60", "pytest~=9.0.3", "pytest-cov~=7.1"]
 
 [tool.pytest.ini_options]
