@@ -8,7 +8,7 @@ dependencies = ["Flask~=3.1", "cryptography~=49.0.0"]
 
 [dependency-groups]
 dev = ["pre-commit~=3.7"]
-docs = ["zensical~=0.0.50", "mkdocstrings-python~=2.0"]
+docs = ["zensical~=0.0.51", "mkdocstrings-python~=2.0"]
 lint = ["ruff~=0.15"]
 test = ["playwright~=1.61", "pytest~=9.1.1", "pytest-cov~=7.1"]
 
