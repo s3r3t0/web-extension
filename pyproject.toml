@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = ["Flask~=3.1", "cryptography~=50.0.0"]
 
 [dependency-groups]
-dev = ["pre-commit~=3.7"]
+dev = ["pre-commit>=3.7,<5.0"]
 docs = ["zensical~=0.0.53", "mkdocstrings-python~=2.0"]
 lint = ["ruff~=0.15"]
 test = ["playwright~=1.62", "pytest~=9.1.1", "pytest-cov~=7.1"]
