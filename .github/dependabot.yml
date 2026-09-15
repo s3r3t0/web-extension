@@ -1,12 +1,16 @@
 version: 2
 updates:
-  - package-ecosystem: uv
-    directory: /
+  - package-ecosystem: "uv"
+    directory: "/"
     schedule:
-      interval: weekly
-    versioning-strategy: increase
+      interval: "weekly"
+    versioning-strategy: "increase"
 
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: daily
+      interval: "weekly"
+    groups:
+      codeql:
+        patterns:
+          - "github/codeql-action/*"
