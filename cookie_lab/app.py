@@ -1,3 +1,5 @@
+"""Flask application for exercising cookie scenarios."""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -45,6 +47,7 @@ def _grouped_scenarios() -> dict[str, list[Any]]:
 
 
 def create_app() -> Flask:
+    """Create the Cookie Lab Flask application."""
     app = Flask(__name__, template_folder="templates", static_folder="static")
 
     @app.get("/")

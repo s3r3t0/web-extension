@@ -12,7 +12,16 @@ repos:
   hooks:
   - id: end-of-file-fixer
   - id: trailing-whitespace
-- repo: https://github.com/pylint-dev/pylint
-  rev: v2.17.2
+- repo: local
   hooks:
-  - id: pylint
+  - id: ruff-check
+    name: ruff
+    entry: uv run --group lint ruff check
+    language: system
+    types: [python]
+  - id: ty-check
+    name: ty
+    entry: uv run --group lint ty check
+    language: system
+    pass_filenames: false
+    types: [python]

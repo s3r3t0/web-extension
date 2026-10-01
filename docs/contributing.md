@@ -39,6 +39,7 @@ make run-https
 - Sync dependencies: `make sync`
 - Lock dependency graph: `make lock`
 - Run lint checks: `make lint`
+- Run type checks: `make typecheck`
 - Check formatting: `make format-check`
 - Auto-format: `make format`
 - Run tests: `make test`
@@ -92,3 +93,4 @@ CI installs uv using the official `astral-sh/setup-uv` action, with both the act
 2. Run make docs-build.
 3. Run make docs-check.
 4. Include documentation updates in the same PR as code changes.
+5. Use Ruff and ty for Python quality checks; pre-commit should stay aligned with `make lint` and `make typecheck`.

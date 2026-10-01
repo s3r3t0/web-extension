@@ -9,16 +9,42 @@ dependencies = ["Flask~=3.1", "cryptography~=50.0.0"]
 [dependency-groups]
 dev = ["pre-commit~=3.7"]
 docs = ["zensical~=0.0.53", "mkdocstrings-python~=2.0"]
-lint = ["ruff~=0.15"]
-test = ["playwright~=1.62", "pytest~=9.1.1", "pytest-cov~=7.1"]
+lint = ["ruff~=0.16.9", "ty~=0.0.84"]
+test = ["playwright~=1.63", "pytest~=9.1.1", "pytest-cov~=7.1"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
 
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.lint]
+extend-select = [
+    # flake8-bugbear: higher-signal correctness and maintainability checks.
+    "B",
+    # pydocstyle: require docstrings for package code.
+    "D",
+    # isort: keep imports consistently ordered.
+    "I",
+    # flake8-simplify: prefer simpler equivalent control flow and expressions.
+    "SIM",
+    # pyupgrade: prefer modern Python syntax and APIs.
+    "UP",
+]
+ignore = [
+    # incorrect-blank-line-before-class: conflicts with the formatter-friendly class docstring convention.
+    "D203",
+    # multi-line-summary-second-line: conflicts with the single-line summary convention used in this repo.
+    "D213",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]
+
 [tool.setuptools.packages.find]
 include = ["cookie_lab*"]
 
 [build-system]
-requires = ["setuptools~=83.0", "wheel"]
+requires = ["setuptools~=84.0", "wheel"]
 build-backend = "setuptools.build_meta"

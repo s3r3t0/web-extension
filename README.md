@@ -133,6 +133,7 @@ The HTTPS target uses Flask adhoc certificates, which require the `cryptography`
 - `make test-e2e-firefox`
 - `make test-e2e-runtime` (Chromium runtime popup smoke via loaded extension)
 - `make lint`
+- `make typecheck`
 - `make format-check`
 - `make precommit`
 - `make ci-local`
