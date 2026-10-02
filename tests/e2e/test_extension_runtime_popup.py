@@ -8,14 +8,15 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 from playwright.sync_api import BrowserContext, Playwright, sync_playwright
+from playwright.sync_api import Error as PlaywrightError
 
 from cookie_lab.models import CookieScenario
 from cookie_lab.scenarios import SCENARIOS
-
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 EXTENSION_DIR = ROOT_DIR / "src"
@@ -36,9 +37,7 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(
-                health_url, timeout=2, context=insecure_ssl
-            ) as resp:
+            with urllib.request.urlopen(health_url, timeout=2, context=insecure_ssl) as resp:
                 if resp.status == 200:
                     return
         except (
@@ -65,11 +64,11 @@ def _post_with_retry(
     url: str,
     attempts: int = 3,
 ):
-    last_error: Exception | None = None
+    last_error: PlaywrightError | None = None
     for _ in range(attempts):
         try:
             return context.request.post(url)
-        except Exception as error:  # pragma: no cover - flaky network branch
+        except PlaywrightError as error:  # pragma: no cover - flaky network branch
             if "EAI_AGAIN" not in str(error):
                 raise
             last_error = error
@@ -93,7 +92,9 @@ def _find_extension_id(
         worker = context.wait_for_event("serviceworker", timeout=3_000)
         if worker.url.startswith("chrome-extension://"):
             return worker.url.split("/")[2]
-    except Exception:  # service worker event may not fire in some environments; fallback to extension directory probing
+    except (
+        PlaywrightError
+    ):  # service worker event may not fire in some environments; fallback to extension directory probing
         pass
 
     deadline = time.time() + timeout_seconds
@@ -171,9 +172,7 @@ def _open_runtime_popup(
         """
     )
 
-    popup.wait_for_function(
-        "document.querySelector('#textarea-cookies').value.length > 0"
-    )
+    popup.wait_for_function("document.querySelector('#textarea-cookies').value.length > 0")
     output = popup.locator("#textarea-cookies").input_value()
 
     popup.close()
@@ -187,10 +186,7 @@ def _assert_cookie_presence(
     expected_present: bool,
     mode: str,
 ) -> None:
-    if mode == "parent-domain":
-        marker = f'"{cookie_name}"'
-    else:
-        marker = f'name = "{cookie_name}"'
+    marker = f'"{cookie_name}"' if mode == "parent-domain" else f'name = "{cookie_name}"'
 
     if expected_present:
         assert marker in output
@@ -205,24 +201,20 @@ def _expected_presence(scenario: CookieScenario, mode: str) -> bool:
         "persistent": scenario.extension_expectation.persistent,
     }[mode]
 
-    override = (
-        BROWSER_EXPECTATION_OVERRIDES.get("chromium", {})
-        .get(scenario.scenario_id, {})
-        .get(mode)
-    )
+    override = BROWSER_EXPECTATION_OVERRIDES.get("chromium", {}).get(scenario.scenario_id, {}).get(mode)
     if override is None:
         return base_expected
     return override
 
 
 @pytest.fixture(scope="session")
-def playwright_instance() -> Playwright:
+def playwright_instance() -> Generator[Playwright, None, None]:
     with sync_playwright() as playwright:
         yield playwright
 
 
 @pytest.fixture(scope="session")
-def cookie_lab_server() -> None:
+def cookie_lab_server() -> Generator[None, None, None]:
     command = [
         sys.executable,
         "-m",
@@ -260,7 +252,7 @@ def cookie_lab_server() -> None:
 def chromium_runtime_context(
     playwright_instance: Playwright,
     cookie_lab_server: None,
-) -> tuple[BrowserContext, str]:
+) -> Generator[tuple[BrowserContext, str], None, None]:
     with tempfile.TemporaryDirectory(prefix="sereto-e2e-") as profile_dir:
         user_data_dir = Path(profile_dir)
         headless = os.environ.get("E2E_HEADLESS", "1") != "0"
@@ -281,6 +273,7 @@ def chromium_runtime_context(
                 "Runtime extension loading is unavailable in this Chromium environment. "
                 "Re-run with a supported local setup (for example E2E_HEADLESS=0)."
             )
+        assert extension_id is not None
 
         try:
             yield context, extension_id

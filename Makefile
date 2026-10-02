@@ -5,7 +5,7 @@ APP_HOST ?= 0.0.0.0
 APP_HTTP_PORT ?= 8000
 APP_HTTPS_PORT ?= 8443
 
-.PHONY: bootstrap sync lock clean run-http run-https test test-scenarios test-coverage test-e2e-install test-e2e test-e2e-chromium test-e2e-firefox test-e2e-runtime docs-serve docs-build docs-check lint format format-check precommit ci-local
+.PHONY: bootstrap sync lock clean run-http run-https test test-scenarios test-coverage test-e2e-install test-e2e test-e2e-chromium test-e2e-firefox test-e2e-runtime docs-serve docs-build docs-check lint typecheck format format-check precommit ci-local
 
 bootstrap:
 	$(UV) sync --group dev --group docs --group lint --group test
@@ -61,6 +61,9 @@ docs-check:
 lint:
 	$(UV) run --group lint ruff check .
 
+typecheck:
+	$(UV) run --group lint ty check
+
 format:
 	$(UV) run --group lint ruff format .
 
@@ -70,4 +73,4 @@ format-check:
 precommit:
 	$(UV) run --group dev pre-commit run --all-files
 
-ci-local: lint format-check test docs-build test-e2e-chromium
+ci-local: lint typecheck format-check test docs-build test-e2e-chromium

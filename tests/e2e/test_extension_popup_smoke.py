@@ -8,14 +8,15 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Generator, Mapping
 from pathlib import Path
 
 import pytest
 from playwright.sync_api import BrowserContext, Playwright, sync_playwright
+from playwright.sync_api import Error as PlaywrightError
 
 from cookie_lab.models import CookieScenario
 from cookie_lab.scenarios import SCENARIOS
-
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 POPUP_URL = (ROOT_DIR / "src" / "popup" / "sereto.html").resolve().as_uri()
@@ -50,9 +51,7 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
 
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(
-                health_url, timeout=2, context=insecure_ssl
-            ) as resp:
+            with urllib.request.urlopen(health_url, timeout=2, context=insecure_ssl) as resp:
                 if resp.status == 200:
                     return
         except (
@@ -66,7 +65,7 @@ def _wait_for_health(base_url: str, timeout_seconds: int = 30) -> None:
     raise RuntimeError(f"Cookie Lab health endpoint did not become ready: {health_url}")
 
 
-def _same_site_for_extension(cookie: dict[str, object]) -> str:
+def _same_site_for_extension(cookie: Mapping[str, object]) -> str:
     same_site = str(cookie.get("sameSite", "unspecified")).lower()
     if same_site == "none":
         return "no_restriction"
@@ -75,7 +74,7 @@ def _same_site_for_extension(cookie: dict[str, object]) -> str:
     return "unspecified"
 
 
-def _to_extension_cookie(cookie: dict[str, object]) -> dict[str, object]:
+def _to_extension_cookie(cookie: Mapping[str, object]) -> dict[str, object]:
     converted: dict[str, object] = {
         "name": cookie["name"],
         "domain": cookie["domain"],
@@ -84,7 +83,8 @@ def _to_extension_cookie(cookie: dict[str, object]) -> dict[str, object]:
         "sameSite": _same_site_for_extension(cookie),
     }
 
-    expires = float(cookie.get("expires", -1))
+    expires_value = cookie.get("expires", -1)
+    expires = float(expires_value) if isinstance(expires_value, int | float | str) else -1.0
     if expires > 0:
         converted["expirationDate"] = expires
 
@@ -157,9 +157,7 @@ def _popup_output_for_mode(
         mode,
     )
 
-    page.wait_for_function(
-        "document.querySelector('#textarea-cookies').value.length > 0"
-    )
+    page.wait_for_function("document.querySelector('#textarea-cookies').value.length > 0")
     output = page.locator("#textarea-cookies").input_value()
     page.close()
     return output
@@ -178,11 +176,11 @@ def _post_with_retry(
     url: str,
     attempts: int = 3,
 ):
-    last_error: Exception | None = None
+    last_error: PlaywrightError | None = None
     for _ in range(attempts):
         try:
             return context.request.post(url)
-        except Exception as error:  # pragma: no cover - flaky network branch
+        except PlaywrightError as error:  # pragma: no cover - flaky network branch
             if "EAI_AGAIN" not in str(error):
                 raise
             last_error = error
@@ -204,10 +202,7 @@ def _assert_cookie_presence(
     expected_present: bool,
     mode: str,
 ) -> None:
-    if mode == "parent-domain":
-        marker = f'"{cookie_name}"'
-    else:
-        marker = f'name = "{cookie_name}"'
+    marker = f'"{cookie_name}"' if mode == "parent-domain" else f'name = "{cookie_name}"'
 
     if expected_present:
         assert marker in output
@@ -222,24 +217,20 @@ def _expected_presence(browser_name: str, scenario: CookieScenario, mode: str) -
         "persistent": scenario.extension_expectation.persistent,
     }[mode]
 
-    override = (
-        BROWSER_EXPECTATION_OVERRIDES.get(browser_name, {})
-        .get(scenario.scenario_id, {})
-        .get(mode)
-    )
+    override = BROWSER_EXPECTATION_OVERRIDES.get(browser_name, {}).get(scenario.scenario_id, {}).get(mode)
     if override is None:
         return base_expected
     return override
 
 
 @pytest.fixture(scope="session")
-def playwright_instance() -> Playwright:
+def playwright_instance() -> Generator[Playwright, None, None]:
     with sync_playwright() as playwright:
         yield playwright
 
 
 @pytest.fixture(scope="session")
-def cookie_lab_server() -> None:
+def cookie_lab_server() -> Generator[None, None, None]:
     command = [
         sys.executable,
         "-m",
@@ -283,7 +274,7 @@ def browser_context(
     playwright_instance: Playwright,
     browser_name: str,
     cookie_lab_server: None,
-) -> BrowserContext:
+) -> Generator[BrowserContext, None, None]:
     if browser_name == "chromium":
         browser = playwright_instance.chromium.launch(headless=True)
     elif browser_name == "firefox":

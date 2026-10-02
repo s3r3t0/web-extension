@@ -1,8 +1,9 @@
+"""Shared data models for cookie scenario definitions and expectations."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
-
 
 ScopeType = Literal["host-only", "domain"]
 PersistenceType = Literal["session", "persistent"]
@@ -11,6 +12,8 @@ StorageResult = Literal["stored", "rejected"]
 
 @dataclass(frozen=True)
 class RequestContext:
+    """Request metadata used when exercising a cookie scenario."""
+
     scheme: Literal["http", "https"]
     host: str
     path: str
@@ -18,6 +21,8 @@ class RequestContext:
 
 @dataclass(frozen=True)
 class BrowserExpectation:
+    """Expected browser-level storage outcome for a scenario."""
+
     storage: StorageResult
     scope: ScopeType
     persistence: PersistenceType
@@ -26,6 +31,8 @@ class BrowserExpectation:
 
 @dataclass(frozen=True)
 class ExtensionExpectation:
+    """Expected extension-side classification for a scenario."""
+
     flags: bool
     parent_domain: bool
     persistent: bool
@@ -33,6 +40,8 @@ class ExtensionExpectation:
 
 @dataclass(frozen=True)
 class CookieAttributes:
+    """Cookie attributes applied by the lab for a scenario."""
+
     name: str
     value: str
     domain: str | None = None
@@ -46,6 +55,8 @@ class CookieAttributes:
 
 @dataclass(frozen=True)
 class CookieScenario:
+    """Complete definition of one cookie scenario under test."""
+
     scenario_id: str
     title: str
     category: str
