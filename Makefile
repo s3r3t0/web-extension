@@ -62,7 +62,7 @@ lint:
 	$(UV) run --group lint ruff check .
 
 typecheck:
-	$(UV) run --group lint ty check
+	$(UV) run --group lint --group test ty check
 
 format:
 	$(UV) run --group lint ruff format .
