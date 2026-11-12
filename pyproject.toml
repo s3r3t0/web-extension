@@ -28,7 +28,7 @@ skip_missing_interpreters = true
 
 [tool.tox.env_run_base]
 dependency_groups = ["test"]
-commands = [["pytest"]]
+commands = [["playwright", "install"], ["pytest"]]
 
 [tool.tox.env.lint]
 dependency_groups = ["lint"]
