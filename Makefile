@@ -26,7 +26,7 @@ run-https:
 	$(UV) run flask --app cookie_lab.app:create_app run --host $(APP_HOST) --port $(APP_HTTPS_PORT) --cert adhoc
 
 test:
-	$(UV) run --group test pytest
+	$(UV) run --group dev tox -e py312,py313,py314
 
 test-scenarios:
 	$(UV) run --group test pytest tests/test_scenarios.py
@@ -71,6 +71,6 @@ format-check:
 	$(UV) run --group lint ruff format --check .
 
 precommit:
-	$(UV) run --group dev pre-commit run --all-files
+	$(UV) run --group dev --group lint --group test pre-commit run --all-files
 
 ci-local: lint typecheck format-check test docs-build test-e2e-chromium

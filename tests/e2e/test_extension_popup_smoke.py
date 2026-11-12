@@ -265,22 +265,22 @@ def cookie_lab_server() -> Generator[None, None, None]:
 
 
 @pytest.fixture(params=_selected_browsers(), ids=lambda browser: browser)
-def browser_name(request: pytest.FixtureRequest) -> str:
+def selected_browser(request: pytest.FixtureRequest) -> str:
     return str(request.param)
 
 
 @pytest.fixture
 def browser_context(
     playwright_instance: Playwright,
-    browser_name: str,
+    selected_browser: str,
     cookie_lab_server: None,
 ) -> Generator[BrowserContext, None, None]:
-    if browser_name == "chromium":
+    if selected_browser == "chromium":
         browser = playwright_instance.chromium.launch(headless=True)
-    elif browser_name == "firefox":
+    elif selected_browser == "firefox":
         browser = playwright_instance.firefox.launch(headless=True)
     else:
-        raise ValueError(f"Unsupported browser: {browser_name}")
+        raise ValueError(f"Unsupported browser: {selected_browser}")
 
     context = browser.new_context(ignore_https_errors=True)
 
@@ -294,7 +294,7 @@ def browser_context(
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda item: item.scenario_id)
 def test_outputs_for_all_scenarios(
     browser_context: BrowserContext,
-    browser_name: str,
+    selected_browser: str,
     scenario: CookieScenario,
 ) -> None:
     _apply_scenario(browser_context, scenario.scenario_id)
@@ -309,7 +309,7 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         flags_output,
         scenario.attributes.name,
-        _expected_presence(browser_name, scenario, "flags"),
+        _expected_presence(selected_browser, scenario, "flags"),
         mode="flags",
     )
 
@@ -322,7 +322,7 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         parent_domain_output,
         scenario.attributes.name,
-        _expected_presence(browser_name, scenario, "parent-domain"),
+        _expected_presence(selected_browser, scenario, "parent-domain"),
         mode="parent-domain",
     )
 
@@ -335,6 +335,6 @@ def test_outputs_for_all_scenarios(
     _assert_cookie_presence(
         persistent_output,
         scenario.attributes.name,
-        _expected_presence(browser_name, scenario, "persistent"),
+        _expected_presence(selected_browser, scenario, "persistent"),
         mode="persistent",
     )

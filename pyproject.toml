@@ -3,18 +3,71 @@ name = "sereto-cookie-lab"
 version = "0.1.0"
 description = "Standards-first cookie testing lab for SeReTo Helper extension QA"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 dependencies = ["Flask~=3.1", "cryptography~=50.0.0"]
 
 [dependency-groups]
-dev = ["pre-commit~=4.6.2"]
-docs = ["zensical~=0.0.53", "mkdocstrings-python~=2.0"]
+dev = ["pre-commit~=4.7.0", "tox~=4.30"]
+docs = ["zensical~=0.1.1", "mkdocstrings-python~=2.0"]
 lint = ["ruff~=0.17.0", "ty~=0.0.84"]
-test = ["playwright~=1.63", "pytest~=9.1.1", "pytest-cov~=7.1"]
+test = [
+    "playwright~=1.63",
+    "pytest~=9.2.0",
+    "pytest-cov~=7.1",
+    "pytest-playwright>=0.10.0",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+
+[tool.tox]
+min_version = "4.0"
+env_list = ["lint", "type", "precommit", "3.12", "3.13", "3.14"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+dependency_groups = ["test"]
+commands = [["pytest"]]
+
+[tool.tox.env.lint]
+dependency_groups = ["lint"]
+commands = [["ruff", "check", "cookie_lab"], ["ruff", "check", "tests"]]
+
+[tool.tox.env.type]
+dependency_groups = ["lint", "test"]
+commands = [["ty", "check", "cookie_lab"], ["ty", "check", "tests"]]
+
+[tool.tox.env.format]
+dependency_groups = ["lint"]
+commands = [
+    [
+        "ruff",
+        "check",
+        "--fix",
+        "cookie_lab",
+    ],
+    [
+        "ruff",
+        "format",
+        "cookie_lab",
+    ],
+    [
+        "ruff",
+        "check",
+        "--fix",
+        "tests",
+    ],
+    [
+        "ruff",
+        "format",
+        "tests",
+    ],
+]
+
+[tool.tox.env.precommit]
+dependency_groups = ["dev", "lint", "test"]
+commands = [["pre-commit", "run", "--all-files"]]
 
 [tool.ruff]
 line-length = 119
