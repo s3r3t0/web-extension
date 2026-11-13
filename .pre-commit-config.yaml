@@ -32,6 +32,6 @@ repos:
     types: [python]
   - id: ty-check
     name: ty
-    entry: uv run --locked --group lint ty check
+    entry: uv run --locked --group lint --group test ty check
     language: system
     types: [python]
