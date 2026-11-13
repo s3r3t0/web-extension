@@ -22,12 +22,16 @@ repos:
   hooks:
   - id: ruff-check
     name: ruff
-    entry: uv run --group lint ruff check
+    entry: uv run --locked --group lint ruff check
+    language: system
+    types: [python]
+  - id: ruff-format
+    name: ruff format check
+    entry: uv run --locked --group lint ruff format --check
     language: system
     types: [python]
   - id: ty-check
     name: ty
-    entry: uv run --group lint --group test ty check
+    entry: uv run --locked --group lint --group test ty check
     language: system
-    pass_filenames: false
     types: [python]

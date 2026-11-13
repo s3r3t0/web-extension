@@ -91,7 +91,7 @@ The application provides:
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
 
 ### Host Mapping
@@ -124,7 +124,7 @@ The HTTPS target uses Flask adhoc certificates, which require the `cryptography`
 
 ### Test and Quality Targets
 
-- `make test`
+- `make test` (Python tests on the active interpreter)
 - `make test-scenarios`
 - `make test-coverage`
 - `make test-e2e-install` (one-time browser binaries installation)
@@ -136,7 +136,13 @@ The HTTPS target uses Flask adhoc certificates, which require the `cryptography`
 - `make typecheck`
 - `make format-check`
 - `make precommit`
-- `make ci-local`
+- `make precommit-install` (install the Git hook)
+- `make ci-local` (required CI checks across all supported Python versions)
+- `make ci-optional` (coverage and runtime popup checks)
+
+The local CI targets require the relevant Python interpreters, Playwright browser
+dependencies, and the host mapping above. See [contributor setup][contributing]
+for details.
 
 ## Wiki
 

@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  baseline:
-    name: Baseline CI (required)
+  quality:
+    name: Quality and docs (required)
     runs-on: ubuntu-latest
 
     steps:
@@ -31,22 +31,64 @@ jobs:
         with:
           version: "latest-known"
 
-      - name: Install Python from project settings
-        run: uv python install
+      - name: Run quality and documentation checks
+        run: make ci-quality
 
-      - name: Sync dependencies
-        run: make bootstrap
+  baseline:
+    name: Python ${{ matrix.python-version }} tests (required)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 3.12
+          - 3.13
+          - 3.14
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Install uv and set Python version
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "latest-known"
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests for this Python version
+        run: uv run --locked --group dev tox -e "${{ matrix.python-version }}"
+
+  e2e:
+    name: Browser smoke tests (required)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "latest-known"
 
       - name: Install Playwright browsers and system deps
-        run: uv run --group test playwright install --with-deps chromium firefox
+        run: make test-e2e-install PLAYWRIGHT_INSTALL_ARGS=--with-deps
 
-      - name: Run baseline CI checks
-        run: make ci-local
+      - name: Run browser smoke tests
+        run: make test-e2e
 
   runtime_optional:
-    name: Runtime Popup E2E (optional)
+    name: Coverage and runtime popup (optional)
     runs-on: ubuntu-latest
-    needs: baseline
     continue-on-error: true
 
     steps:
@@ -63,16 +105,12 @@ jobs:
         with:
           version: "latest-known"
 
-      - name: Install Python from project settings
-        run: uv python install
-
-      - name: Sync dependencies
-        run: make bootstrap
-
       - name: Install Playwright browsers and system deps
-        run: uv run --group test playwright install --with-deps chromium firefox
+        run: make test-optional-install PLAYWRIGHT_INSTALL_ARGS=--with-deps
+
+      - name: Run coverage
+        continue-on-error: true
+        run: make test-coverage
 
       - name: Run optional runtime popup smoke checks
-        env:
-          E2E_EXTENSION_RUNTIME: "1"
         run: make test-e2e-runtime

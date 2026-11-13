@@ -3,18 +3,81 @@ name = "sereto-cookie-lab"
 version = "0.1.0"
 description = "Standards-first cookie testing lab for SeReTo Helper extension QA"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 dependencies = ["Flask~=3.1", "cryptography~=50.0.0"]
 
 [dependency-groups]
-dev = ["pre-commit~=4.6.2"]
-docs = ["zensical~=0.0.53", "mkdocstrings-python~=2.0"]
+dev = ["pre-commit~=4.7.0", "tox~=4.30"]
+docs = ["zensical~=0.1.1", "mkdocstrings-python~=2.0"]
 lint = ["ruff~=0.17.0", "ty~=0.0.84"]
-test = ["playwright~=1.63", "pytest~=9.1.1", "pytest-cov~=7.1"]
+test = [
+    "playwright~=1.63",
+    "pytest~=9.2.0",
+    "pytest-cov~=7.1",
+    "pytest-playwright>=0.10.0",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+
+[tool.tox]
+min_version = "4.0"
+env_list = ["precommit", "docs", "3.12", "3.13", "3.14", "e2e"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+dependency_groups = ["test"]
+pass_env = ["COOKIE_LAB_BASE_URL", "E2E_BROWSERS", "E2E_HEADLESS"]
+commands = [["pytest", "--ignore=tests/e2e", "{posargs:tests}"]]
+
+[tool.tox.env.test]
+
+[tool.tox.env.e2e]
+commands = [["pytest", "tests/e2e/test_extension_popup_smoke.py"]]
+
+[tool.tox.env.runtime]
+set_env = { E2E_EXTENSION_RUNTIME = "1" }
+commands = [["pytest", "-rs", "tests/e2e/test_extension_runtime_popup.py"]]
+
+[tool.tox.env.coverage]
+commands = [
+    [
+        "python",
+        "-m",
+        "pytest",
+        "--cov=cookie_lab",
+        "--cov-report=term-missing",
+        "--ignore=tests/e2e/test_extension_runtime_popup.py",
+        "tests",
+    ],
+]
+
+[tool.tox.env.format]
+dependency_groups = ["lint"]
+commands = [
+    [
+        "ruff",
+        "check",
+        "--fix",
+        "cookie_lab",
+        "tests",
+    ],
+    [
+        "ruff",
+        "format",
+        "cookie_lab",
+        "tests",
+    ],
+]
+
+[tool.tox.env.precommit]
+dependency_groups = ["dev"]
+commands = [["pre-commit", "run", "--all-files"]]
+
+[tool.tox.env.docs]
+dependency_groups = ["docs"]
+commands = [["zensical", "build", "--strict"]]
 
 [tool.ruff]
 line-length = 119
